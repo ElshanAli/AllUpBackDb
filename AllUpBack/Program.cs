@@ -1,7 +1,9 @@
-using AllUpBack.Areas.Admin.Data;
 using AllUpBack.Areas.Admin.Services;
 using AllUpBack.DAL;
+using AllUpBack.DAL.Entities;
+using AllUpBack.Data;
 using AllUpBack.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -9,7 +11,7 @@ namespace AllUpBack
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +20,31 @@ namespace AllUpBack
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                   builder =>
+                   {
+                       builder.MigrationsAssembly(nameof(AllUpBack));
+                   });
+                    
             });
 
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredLength = 5;
+
+                options.User.RequireUniqueEmail = true;
+
+            }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
+
             builder.Services.AddScoped<CategoryService>();
+            builder.Services.Configure<AdminUser>(builder.Configuration.GetSection("AdminUser"));
+
             Constants.RootPath = builder.Environment.WebRootPath;
             Constants.FlagPath = Path.Combine(Constants.RootPath, "assets", "images", "flag");
             Constants.CategoryPath = Path.Combine(Constants.RootPath, "assets", "images", "category");
@@ -40,13 +63,22 @@ namespace AllUpBack
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
+            using (var scope = app.Services.CreateScope())
+            {
+                var serviceProvider = scope.ServiceProvider;
 
-            app.UseRequestLocalization(locOptions.Value);
+                var dataInitalizer = new DataInitalizer(serviceProvider);
 
-            app.UseRouting();
+                await dataInitalizer.SeedData();
+            }
+
+                app.UseRouting();
 
             app.UseAuthorization();
+
+             var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
+
+            app.UseRequestLocalization(locOptions.Value);
 
             app.UseEndpoints(endpoints =>
             {
@@ -62,7 +94,7 @@ namespace AllUpBack
             });
 
 
-            app.Run();
+            await app.RunAsync();
         }
     }
 }

@@ -64,9 +64,10 @@
                                         <button type="button" id="setting" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Setting <i class="icon ion-chevron-down"></i></button>
 
                                         <ul class="dropdown-menu" aria-labelledby="setting">
+                                             <li><a asp-controller="account" asp-action="register">Register</a></li>
                                             <li><a href="my-account.html">My account</a></li>
                                             <li><a href="checkout.html">Checkout</a></li>
-                                            <li><a href="login.html">Sign in</a></li>
+                                            <li><a asp-controller="account" asp-action="login">Sign in</a></li>
                                         </ul>
                                     </div>
                                 </li>

@@ -2,6 +2,7 @@
 using AllUpBack.Areas.Admin.ViewModels;
 using AllUpBack.DAL;
 using AllUpBack.DAL.Entities;
+using AllUpBack.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
