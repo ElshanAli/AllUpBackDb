@@ -1,0 +1,15 @@
+﻿@model LanguageViewModel
+
+@{
+    var languages = Model.Languages;
+    var selectedLanguages = Model.SelectedLanguage;
+}
+<button type="button" id="langue" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><img src="~/assets/images/flag/@selectedLanguages.ImageUrl" alt=""> @selectedLanguages.Name <i class="icon ion-chevron-down"></i></button>
+
+<ul class="dropdown-menu" aria-labelledby="langue">
+    @foreach (var language in languages)
+    {
+        <li><a asp-controller="languages" asp-action="ChangeLanguage" asp-route-culture="@language.IsoCode"> <img src="~/assets/images/flag/@language.ImageUrl" alt=""> @language.Name</a></li>
+
+    }
+</ul>
