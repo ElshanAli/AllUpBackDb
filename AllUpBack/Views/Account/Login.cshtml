@@ -22,7 +22,10 @@
             <div class="col-lg-6">
                 <div class="login-register-wrapper mt-30">
                     <h4 class="allup-title">Login to Your Account</h4>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <form asp-action="login" method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                        
                         <div class="single-form">
                             <input asp-for="UserName" placeholder="Username *">
                             <br />

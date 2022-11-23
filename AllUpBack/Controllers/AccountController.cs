@@ -73,8 +73,10 @@ namespace AllUpBack.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        public IActionResult Login(string returnUrl)
+        public IActionResult Login(string? returnUrl)
         {
+           
+
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
@@ -90,8 +92,13 @@ namespace AllUpBack.Controllers
                 return View();
             }
 
-            var signResult = await _signInManager.PasswordSignInAsync(existUser, model.Password, model.RememberMe, false);
+            var signResult = await _signInManager.PasswordSignInAsync(existUser, model.Password, model.RememberMe, true);
 
+            if (signResult.IsLockedOut)
+            {
+                 ModelState.AddModelError("", "This user locked out");
+                    return View();
+            }
             if (!signResult.Succeeded)
             {
                 ModelState.AddModelError("", "Invalid credential");
@@ -110,6 +117,12 @@ namespace AllUpBack.Controllers
 
         public IActionResult AccessDenied()
         {
+            return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
     }

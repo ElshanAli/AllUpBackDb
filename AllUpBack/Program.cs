@@ -25,7 +25,7 @@ namespace AllUpBack
                    {
                        builder.MigrationsAssembly(nameof(AllUpBack));
                    });
-                    
+
             });
 
             builder.Services.AddIdentity<User, IdentityRole>(options =>
@@ -72,11 +72,12 @@ namespace AllUpBack
                 await dataInitalizer.SeedData();
             }
 
-                app.UseRouting();
+            app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
-             var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
+            var locOptions = app.Services.GetService<IOptions<RequestLocalizationOptions>>();
 
             app.UseRequestLocalization(locOptions.Value);
 

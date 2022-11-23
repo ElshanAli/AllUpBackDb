@@ -52,7 +52,7 @@
                         <select asp-for="ParentCategoryId" asp-items="Model.ParentCategories" id="parentCategory" class="form-control" placeholder="Choose Parent Category"></select>
                         <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" id="childCategories">
                         <label asp-for="ChildCategoryId">Choose Child Categories</label>
                         <select asp-for="ChildCategoryId" asp-items="Model.ChildCategories" id="childCategory" class="form-control" placeholder="Choose Child Category"></select>
                         <span asp-validation-for="ChildCategoryId" class="text-danger"></span>
@@ -72,15 +72,39 @@
 
             $("#parentCategory").change(function () {
                 var parentCategoryId = $(this).val();
-                $.ajax({
-                    type: "GET",
-                    url: "/Admin/Products/ChildCategories",
-                    data: {
-                        parentCategoryId: parentCategoryId
-                    },
-                    success: succesFunction,
-                    error: errorFunction
-                });
+
+                fetch("/Admin/Products/ChildCategories?parentCategoryId=" + parentCategory.value)
+                    .then(response => response.json())
+                    .then(childCategories => {
+                        var select = $("#childCategory");
+                        select.empty();
+
+                        console.log(childCategories)
+
+                        if (childCategories.length == 0) {
+                             $("#childCategories").addClass("d-none");
+                             return;
+                        }
+
+                        $("#childCategories").removeClass("d-none");
+
+                        childCategories.forEach(childCategory => {
+                            select.append($('<option/>', {
+                                value: childCategory.value,
+                                text: childCategory.text
+                            }));
+                        })
+                    });
+
+                //$.ajax({
+                //    type: "GET",
+                //    url: "/Admin/Products/ChildCategories",
+                //    data: {
+                //        parentCategoryId: parentCategoryId
+                //    },
+                //    success: succesFunction,
+                //    error: errorFunction
+                //});
 
                 function succesFunction(data) {
                     var select = $("#childCategory");

@@ -1,0 +1,235 @@
+﻿@model ProductUpdateViewModel
+@section Styles
+    {
+    <style>
+        .productImage {
+            width: 120px !important;
+            height: 120px !important;
+            object-fit: contain !important;
+        }
+    </style>
+}
+    <div class="row col-sm-6">
+        <div class="col-sm-12 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title"> Create Product</h4>
+                    <form class="forms-sample" method="post" asp-action="Update" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <label asp-for="Name">Name</label>
+                            <input asp-for="Name" class="form-control" placeholder="Name">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Description">Description</label>
+                            <input asp-for="Description" class="form-control" placeholder="Description">
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Price">Choose Price</label>
+                            <input asp-for="Price" class="form-control" placeholder="Choose Price">
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Discount">Choose Discount</label>
+                            <input asp-for="Discount" class="form-control" placeholder="Choose Discount">
+                            <span asp-validation-for="Discount" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Rate">Choose Rate</label>
+                            <input asp-for="Rate" class="form-control" placeholder="Choose Rate">
+                            <span asp-validation-for="Rate" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Brand">Choose Brand</label>
+                            <input asp-for="Brand" class="form-control" placeholder="Choose Brand">
+                            <span asp-validation-for="Brand" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="ExTax">Choose ExTax</label>
+                            <input asp-for="ExTax" class="form-control" placeholder="Choose ExTax">
+                            <span asp-validation-for="ExTax" class="text-danger"></span>
+                        </div>
+                        <input asp-for="RemoveImageIds" type="hidden" />
+                        <div class="form-group">
+                            <label asp-for="Images">Choose Images</label>
+                            <input asp-for="Images" class="form-control" placeholder="Choose Images" accept="image/*">
+                            <span asp-validation-for="Images" class="text-danger"></span>
+                        </div>
+
+                        <div class="imagesTable">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+
+                                        <th>Image</th>
+                                        <th>Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                @foreach (var productImage in Model.ProductImages)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img class="productImage" src="~/assets/images/product/@productImage.Name" />
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-danger removeProductImage" data-id="@productImage.Id">Delete</button>
+                                        </td>
+
+                                    </tr>
+                                }
+
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ParentCategoryId">Choose Parent Categories</label>
+                        <select asp-for="ParentCategoryId" asp-items="Model.ParentCategories" id="parentCategory" class="form-control" placeholder="Choose Parent Category"></select>
+                        <span asp-validation-for="ParentCategoryId" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" id="childCategories">
+                        <label asp-for="ChildCategoryId">Choose Child Categories</label>
+                        <select asp-for="ChildCategoryId" asp-items="Model.ChildCategories" id="childCategory" class="form-control" placeholder="Choose Child Category"></select>
+                        <span asp-validation-for="ChildCategoryId" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary mr-2">Submit</button>
+                    <button class="btn btn-light" asp-action="Index">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section SubCategory
+    {
+    <script>
+
+        const removeSelectedImage = (ev, fileIndex) => {
+            const transferOfData = new DataTransfer();
+            const productImagesInput = document.getElementById("Images");
+
+            [...productImagesInput.files].filter((file, index) => {
+
+                if (index === fileIndex) return;
+                transferOfData.items.add(file);
+
+            });
+
+            productImagesInput.files = transferOfData.files;
+            ev.target.closest("tr").remove();
+
+        }
+
+        $(document).ready(function () {
+
+            const productImagesInput = document.getElementById("Images");
+            productImagesInput.addEventListener("change", function (e) {
+
+                console.log(e);
+                const productImages = e.target.files;
+                [...productImages].forEach((productImage, fileIndex) => {
+
+                    if (productImage.type.match("image")) {
+
+                        let reader = new FileReader();
+                        reader.readAsDataURL(productImage);
+
+                        reader.addEventListener("load", function (e) {
+
+                            $("tbody").append(`
+                                    <tr>
+
+                                            <td>
+                                                <img class="productImage" src="${e.target.result}" />
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-danger" onClick="removeSelectedImage(event, ${fileIndex})">Delete</button>
+                                            </td>
+
+                                    </tr>
+                                    `);
+                        });
+                    }
+
+                });
+            });
+
+            let removedImageIds = [];
+
+            $(".removeProductImage").on("click", function () {
+                const productImageId = $(this).attr("data-id");
+                console.log(productImageId);
+                removedImageIds.push(productImageId);
+
+                $("input#RemoveImageIds").val(removedImageIds);
+                $(this).attr("disabled", true);
+
+            });
+
+
+
+            //////////////////////////////////////////////////////
+
+
+            $("#parentCategory").change(function () {
+                var parentCategoryId = $(this).val();
+
+                fetch("/Admin/Products/ChildCategories?parentCategoryId=" + parentCategory.value)
+                    .then(response => response.json())
+                    .then(childCategories => {
+                        var select = $("#childCategory");
+                        select.empty();
+
+                        if (childCategories.length == 0) {
+                            $("#childCategories").addClass("d-none");
+                            return;
+                        }
+
+                        $("#childCategories").removeClass("d-none");
+
+                        childCategories.forEach(childCategory => {
+                            select.append($('<option/>', {
+                                value: childCategory.value,
+                                text: childCategory.text
+                            }));
+                        })
+                    });
+
+                //$.ajax({
+                //    type: "GET",
+                //    url: "/Admin/Products/ChildCategories",
+                //    data: {
+                //        parentCategoryId: parentCategoryId
+                //    },
+                //    success: succesFunction,
+                //    error: errorFunction
+                //});
+
+                function succesFunction(data) {
+                    var select = $("#childCategory");
+                    select.empty();
+                    $.each(data, function (index, itemData) {
+                        select.append($('<option/>', {
+                            value: itemData.value,
+                            text: itemData.text
+                        }));
+                    });
+
+
+                }
+
+                function errorFunction() {
+                    alert("error");
+                }
+            });
+        });
+    </script>
+}
